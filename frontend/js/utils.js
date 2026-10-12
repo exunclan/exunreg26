@@ -4,6 +4,9 @@ function isMobile() {
 
 async function loadComponent(componentPath, targetElement) {
   try {
+    if (targetElement && targetElement !== document.body && targetElement.innerHTML && targetElement.innerHTML.trim().length > 0) {
+      return targetElement.innerHTML;
+    }
     const response = await fetch(componentPath);
     const html = await response.text();
     if (targetElement) {

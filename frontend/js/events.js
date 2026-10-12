@@ -7,6 +7,30 @@ class EventsPage {
     }
 
     async init() {
+        if (Array.isArray(window.__EVENTS__)) {
+            this.events = window.__EVENTS__.map(event => ({
+                ...event,
+                image: event.image ? (String(event.image).startsWith('/') ? event.image : `/illustrations/${String(event.image).split('/').pop()}`) : '/assets/exun_base.webp'
+            }));
+            this.filteredEvents = [...this.events];
+            if (!document.querySelector('.events-page__grid .event-card')) this.renderEvents();
+            else this.attachCardHandlers(document.querySelector('.events-page__grid'));
+            if (!document.querySelector('.events-page__filters .filter-btn')) this.setupFilters();
+            else this.hydrateFilters();
+            this.setupEventListeners();
+            this.setupSummaryButton();
+            this.trackFilterSlider();
+            this.refreshEvents();
+            const params = new URLSearchParams(window.location.search);
+            const focusId = params.get('focus');
+            if (focusId) {
+                Utils.focusEventCard(focusId);
+                params.delete('focus');
+                const clean = window.location.pathname + (params.toString() ? `?${params.toString()}` : '') + window.location.hash;
+                window.history.replaceState(null, '', clean);
+            }
+            return;
+        }
         await this.loadEvents();
         this.setupFilters();
         this.renderEvents();
@@ -57,6 +81,15 @@ class EventsPage {
         filtersContainer.appendChild(this.createFilterButton('all', 'All Events', true));
         categories.forEach(category => {
             filtersContainer.appendChild(this.createFilterButton(category.key, category.name));
+        });
+    }
+
+    hydrateFilters() {
+        document.querySelectorAll('.events-page__filters .filter-btn').forEach((button) => {
+            button.addEventListener('click', () => {
+                this.applyFilter(button.dataset.filter);
+                this.updateActiveFilter(button);
+            });
         });
     }
 
@@ -144,6 +177,34 @@ class EventsPage {
                 if (active) this.moveFilterSlider(active);
             });
         }
+    }
+
+    attachCardHandlers(scope) {
+        const cards = (scope || document).querySelectorAll('.event-card[data-event-id]');
+        cards.forEach((card) => {
+            if (card.dataset.hydrated) return;
+            card.dataset.hydrated = '1';
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                Utils.rememberEventBack(`/events?focus=${encodeURIComponent(card.dataset.eventId)}`);
+                const found = this.events.find((v) => String(v.id) === String(card.dataset.eventId));
+                window.location.href = `/event/${Utils.slugify((found && found.name) || card.dataset.eventId)}`;
+            });
+        });
+    }
+
+    async refreshEvents() {
+        try {
+            const response = await window.ExunServices.events.getAllEvents();
+            const fresh = ((response && response.data) || []).map(event => ({
+                ...event,
+                image: event.image ? (String(event.image).startsWith('/') ? event.image : `/illustrations/${String(event.image).split('/').pop()}`) : '/assets/exun_base.webp'
+            }));
+            if (JSON.stringify(fresh.map((v) => v.id)) !== JSON.stringify(this.events.map((v) => v.id))) {
+                this.events = fresh;
+                this.applyFilter(this.currentFilter);
+            }
+        } catch (e) {}
     }
 
     renderEvents() {

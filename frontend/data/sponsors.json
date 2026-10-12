@@ -4,5 +4,11 @@
     "alt": "Intel",
     "link": "https://www.intel.com/",
     "height": "175px"
+  },
+  {
+    "imageUrl": "/assets/jane_street.png",
+    "alt": "Jane Street",
+    "link": "https://www.janestreet.com/",
+    "height": "190px"
   }
 ]

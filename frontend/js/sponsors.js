@@ -1,29 +1,51 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const rows = document.querySelectorAll("#sponsors-row");
   if (rows.length > 0) {
+    let hydrated = false;
+    rows.forEach((row) => {
+      if (row.querySelector(".sponsor-link")) hydrated = true;
+    });
+    if (hydrated) {
+      if (Array.isArray(window.__SPONSORS__)) {
+        const current = rows[0].querySelectorAll(".sponsor-link").length;
+        if (current !== window.__SPONSORS__.length) renderSponsors(window.__SPONSORS__, rows);
+        else sizeSponsorImages();
+      } else {
+        sizeSponsorImages();
+      }
+      return;
+    }
+    if (Array.isArray(window.__SPONSORS__)) {
+      renderSponsors(window.__SPONSORS__, rows);
+      return;
+    }
     try {
       const resp = await fetch("/data/sponsors.json");
       if (resp.ok) {
         const data = await resp.json();
         const list = Array.isArray(data) ? data : (data.sponsors || []);
-        const html = list.map((s) => {
-          const rawHref = s.link || s.Link || "#";
-          const rawSrc = s.imageUrl || s.ImageURL || s.image || "";
-          const href = Utils.isAllowedUrl(rawHref) ? rawHref : "#";
-          const src = Utils.isAllowedUrl(rawSrc) || rawSrc.startsWith("/") ? rawSrc : "";
-          const alt = s.alt || s.Alt || "Sponsor";
-          const height = s.height || s.Height || "80px";
-          return `<a href="${Utils.escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="sponsor-link"><img src="${Utils.escapeHtml(src)}" alt="${Utils.escapeHtml(alt)}" class="sponsor-img" data-height="${Utils.escapeHtml(height)}" loading="lazy" /></a>`;
-        }).join("");
-        rows.forEach((row) => {
-          row.innerHTML = html;
-        });
-        sizeSponsorImages();
+        renderSponsors(list, rows);
       }
     } catch (e) {}
   }
   sizeSponsorImages();
 });
+
+function renderSponsors(list, rows) {
+  const html = list.map((s) => {
+    const rawHref = s.link || s.Link || "#";
+    const rawSrc = s.imageUrl || s.ImageURL || s.image || "";
+    const href = Utils.isAllowedUrl(rawHref) ? rawHref : "#";
+    const src = Utils.isAllowedUrl(rawSrc) || String(rawSrc).startsWith("/") ? rawSrc : "";
+    const alt = s.alt || s.Alt || "Sponsor";
+    const height = s.height || s.Height || "80px";
+    return `<a href="${Utils.escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="sponsor-link"><img src="${Utils.escapeHtml(src)}" alt="${Utils.escapeHtml(alt)}" class="sponsor-img" data-height="${Utils.escapeHtml(height)}" loading="lazy" /></a>`;
+  }).join("");
+  rows.forEach((row) => {
+    row.innerHTML = html;
+  });
+  sizeSponsorImages();
+}
 
 function sizeSponsorImages() {
   var imgs = document.querySelectorAll('.sponsor-img');

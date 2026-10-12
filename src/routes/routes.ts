@@ -17,6 +17,7 @@ import * as chatHandlers from '../handlers/chat'
 import * as adminTicketHandlers from '../handlers/adminTickets'
 import * as adminKbHandlers from '../handlers/adminKb'
 import * as ticketHandlers from '../handlers/tickets'
+import { serveEventDetail, serveEvents, serveHome, serveShell } from '../lib/ssr'
 
 export function serveAsset(c: AppContext, path: string) {
     const url = new URL(c.req.url)
@@ -24,16 +25,21 @@ export function serveAsset(c: AppContext, path: string) {
     return c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw))
 }
 
-export function notFoundHandler(c: AppContext) {
+export async function notFoundHandler(c: AppContext) {
     const pathname = new URL(c.req.url).pathname
     if (pathname.startsWith('/api/')) return jsonError(c, 'Not found', 404)
     const last = pathname.split('/').pop() ?? ''
     if (last.includes('.')) return serveAsset(c, pathname)
-    const url = new URL(c.req.url)
-    url.pathname = '/404.html'
-    return c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw)).then(
-        async (res: Response) => new Response(await res.text(), { status: 404, headers: { 'Content-Type': 'text/html;charset=UTF-8' } })
-    )
+    try {
+        const res = await serveShell(c, '/404.html', pathname)
+        return new Response(await res.text(), { status: 404, headers: { 'Content-Type': 'text/html;charset=UTF-8', 'Cache-Control': 'private, max-age=30, must-revalidate', Vary: 'Cookie' } })
+    } catch {
+        const url = new URL(c.req.url)
+        url.pathname = '/404.html'
+        return c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw)).then(
+            async (res: Response) => new Response(await res.text(), { status: 404, headers: { 'Content-Type': 'text/html;charset=UTF-8' } })
+        )
+    }
 }
 
 export function setupRoutes() {
@@ -67,7 +73,7 @@ export function setupRoutes() {
     app.post('/api/query', authRequired, queryHandlers.queryHandler)
     app.get('/api/tickets/mine', authRequired, queryHandlers.listMyTickets)
     app.post('/api/tickets', authRequired, ticketHandlers.createTicket)
-    app.get('/ticket', (c) => serveAsset(c, '/ticket.html'))
+    app.get('/ticket', (c) => serveShell(c as AppContext, '/ticket.html', '/ticket'))
 
     app.post('/api/chat/conversations', authRequired, chatHandlers.createConversation)
     app.get('/api/chat/conversations', authRequired, chatHandlers.listConversations)
@@ -114,17 +120,20 @@ export function setupRoutes() {
     app.get('/api/admin/kb/sources/:id/chunks', adminRequired, adminKbHandlers.getSourceChunks)
     app.post('/api/admin/kb/sync', adminRequired, adminKbHandlers.syncSources)
 
-    app.get('/', (c) => serveAsset(c, '/index.html'))
-    app.get('/events', (c) => serveAsset(c, '/events.html'))
-    app.get('/login', (c) => serveAsset(c, '/login.html'))
-    app.get('/summary', (c) => serveAsset(c, '/summary.html'))
-    app.get('/complete', (c) => serveAsset(c, '/complete.html'))
-    app.get('/admin', (c) => serveAsset(c, '/admin.html'))
-    app.get('/brochure', (c) => serveAsset(c, '/brochure.html'))
-    app.get('/query', (c) => serveAsset(c, '/query.html'))
-    app.get('/query/tickets', (c) => serveAsset(c, '/query.html'))
-    app.get('/event-detail', (c) => serveAsset(c, '/event-detail.html'))
-    app.get('/event/:slug', (c) => serveAsset(c, '/event-detail.html'))
+    app.get('/', (c) => serveHome(c as AppContext))
+    app.get('/events', (c) => serveEvents(c as AppContext))
+    app.get('/login', (c) => serveShell(c as AppContext, '/login.html', '/login'))
+    app.get('/summary', (c) => serveShell(c as AppContext, '/summary.html', '/summary'))
+    app.get('/complete', (c) => serveShell(c as AppContext, '/complete.html', '/complete'))
+    app.get('/admin', (c) => serveShell(c as AppContext, '/admin.html', '/admin'))
+    app.get('/brochure', (c) => serveShell(c as AppContext, '/brochure.html', '/brochure'))
+    app.get('/query', (c) => serveShell(c as AppContext, '/query.html', '/query'))
+    app.get('/query/tickets', (c) => serveShell(c as AppContext, '/query.html', '/query'))
+    app.get('/event-detail', (c) => {
+        const id = c.req.query('id') || c.req.query('eventId') || ''
+        return serveEventDetail(c as AppContext, id)
+    })
+    app.get('/event/:slug', (c) => serveEventDetail(c as AppContext, c.req.param('slug') || ''))
 
     return app
 }

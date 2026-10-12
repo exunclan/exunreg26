@@ -16,6 +16,14 @@ class EventDetailPage {
   }
 
   async init() {
+    if (window.__EVENT__) {
+      this.event = window.__EVENT__;
+      if (this.event && this.event.id) this.eventId = this.event.id;
+      this.renderEvent();
+      this.setupEventListeners();
+      this.refreshEvent();
+      return;
+    }
     if (!this.eventId) {
       Utils.showToast("Invalid event ID", "error");
       Utils.redirect("/events", 1800);
@@ -32,6 +40,19 @@ class EventDetailPage {
     }
     this.renderEvent();
     this.setupEventListeners();
+  }
+
+  async refreshEvent() {
+    try {
+      const response = await window.ExunServices.events.getEvent(this.eventId);
+      if (response && response.status === "success" && response.data) {
+        if (JSON.stringify(response.data) !== JSON.stringify(this.event)) {
+          this.event = response.data;
+          if (this.event.id) this.eventId = this.event.id;
+          this.renderEvent();
+        }
+      }
+    } catch (e) {}
   }
 
   async loadEvent() {

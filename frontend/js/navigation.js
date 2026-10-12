@@ -6,12 +6,28 @@ class Navigation {
 
   async init() {
     const authContainer = document.querySelector('[data-nav="auth"]');
-        if (authContainer && !authContainer.textContent.trim()) {
-            authContainer.innerHTML = `<span class="navbar__link navbar__link--loading" data-nav-loading aria-hidden="true">…</span>`;
-        }
+    if (authContainer && window.__SESSION__) {
+      this.session = window.__SESSION__;
+      this.setupEventListeners();
+      this.updateNavigation();
+      this.refreshSession();
+      return;
+    }
+    if (authContainer && !authContainer.textContent.trim()) {
+      authContainer.innerHTML = `<span class="navbar__link navbar__link--loading" data-nav-loading aria-hidden="true">…</span>`;
+    }
     this.setupEventListeners();
     await this.loadUserState();
     this.updateNavigation();
+  }
+
+  async refreshSession() {
+    try {
+      const fresh = await window.ExunServices.api.getSession(true);
+      const prev = JSON.stringify(this.session);
+      this.session = fresh;
+      if (JSON.stringify(fresh) !== prev) this.updateNavigation();
+    } catch (e) {}
   }
 
   async loadUserState() {

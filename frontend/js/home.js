@@ -5,11 +5,56 @@ class HomePage {
     }
 
     async init() {
+        if (Array.isArray(window.__EVENTS__)) {
+            this.events = window.__EVENTS__;
+            this.hydrateEvents();
+            this.setupEventListeners();
+            this.refreshEvents();
+            const focusId = new URLSearchParams(window.location.search).get('focus');
+            if (focusId) Utils.focusEventCard(focusId);
+            return;
+        }
         await this.loadEvents();
         this.renderEvents();
         this.setupEventListeners();
         const focusId = new URLSearchParams(window.location.search).get('focus');
         if (focusId) Utils.focusEventCard(focusId);
+    }
+
+    hydrateEvents() {
+        const grid = document.querySelector('.events-grid');
+        if (!grid) return;
+        if (grid.querySelector('.event-card')) {
+            this.attachCardHandlers(grid);
+            return;
+        }
+        this.renderEvents();
+    }
+
+    attachCardHandlers(scope) {
+        const cards = (scope || document).querySelectorAll('.event-card[data-event-id]');
+        cards.forEach((card) => {
+            if (card.dataset.hydrated) return;
+            card.dataset.hydrated = '1';
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const id = card.dataset.eventId;
+                const name = (this.events.find((v) => String(v.id) === String(id)) || {}).name || id;
+                Utils.rememberEventBack(`/?focus=${encodeURIComponent(id)}`);
+                window.location.href = `/event/${Utils.slugify(name || id)}`;
+            });
+        });
+    }
+
+    async refreshEvents() {
+        try {
+            const response = await window.ExunServices.events.getAllEvents();
+            const fresh = (response && response.data) || [];
+            if (JSON.stringify(fresh.map((v) => v.id)) !== JSON.stringify(this.events.map((v) => v.id))) {
+                this.events = fresh;
+                this.renderEvents();
+            }
+        } catch (e) {}
     }
 
     async loadEvents() {

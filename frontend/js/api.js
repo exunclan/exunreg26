@@ -46,6 +46,10 @@ async function apiRequest(endpoint, options = {}) {
 let _sessionCache = null;
 let _sessionPromise = null;
 
+if (typeof window !== 'undefined' && window.__SESSION__) {
+    _sessionCache = window.__SESSION__;
+}
+
 async function getSession(force = false) {
     if (_sessionCache && !force) return _sessionCache;
     if (_sessionPromise && !force) return _sessionPromise;
