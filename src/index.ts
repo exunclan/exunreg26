@@ -36,10 +36,10 @@ app.use('*', secureHeaders({
     strictTransportSecurity: 'max-age=31536000; includeSubDomains',
     contentSecurityPolicy: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://static.cloudflareinsights.com'],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", 'https://cloudflareinsights.com'],
         frameAncestors: ["'none'"],
     },
     permissionsPolicy: {

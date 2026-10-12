@@ -17,10 +17,10 @@ async function assetText(c: AppContext, path: string): Promise<string> {
     if (cached !== undefined) return cached
     const url = new URL(c.req.url)
     url.pathname = path
-    const res = await c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw))
+    const res = await c.env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }))
     const text = await res.text()
     if (assetTextCache.size > 100) assetTextCache.clear()
-    assetTextCache.set(path, text)
+    if (text.length > 0) assetTextCache.set(path, text)
     return text
 }
 
@@ -326,7 +326,7 @@ export async function serveEventDetail(c: AppContext, slugOrId: string): Promise
         html = html.replace(/<h1 class="event-detail-heading" id="event-heading">[\s\S]*?<\/h1>/, `<h1 class="event-detail-heading" id="event-heading">${content.heading}</h1>`)
         html = html.replace(/<img[\s\S]*?id="event-image"[\s\S]*?\/>/, `<img src="${esc(content.image)}" alt="${esc(String(ev.name || 'Event'))}" class="event-detail__image" id="event-image" />`)
         html = html.replace(/<div class="event-description" id="event-description">[\s\S]*?<\/div>/, `<div class="event-description" id="event-description">${content.desc}</div>`)
-        html = html.replace(/<div class="event-info" id="event-info">[\s\S]*?<\/div>/, `<div class="event-info" id="event-info">${content.info}</div>`)
+        html = html.replace(/<div class="event-info" id="event-info">\s*<div class="loading-placeholder">Loading\.\.\.<\/div>\s*<\/div>/, `<div class="event-info" id="event-info">${content.info}</div>`)
     }
     html = injectBeforeFirstScript(html, `<script>window.__SESSION__=${safeJson(session)};window.__EVENT__=${safeJson(ev)};</script>`)
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8', 'Cache-Control': 'private, max-age=30, must-revalidate', Vary: 'Cookie' } })
