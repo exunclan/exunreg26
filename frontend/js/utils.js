@@ -251,6 +251,11 @@ function formatParticipants(count) {
 function formatParticipantsDisplay(event) {
   const custom = event ? (event.display_participants || event.displayParticipants) : "";
   if (custom && /[a-zA-Z]/.test(String(custom))) return String(custom);
+  if (event) {
+    const name = String(event.name || "");
+    const id = String(event.id || "");
+    if (/surprise/i.test(name) || /surprise/i.test(id)) return "2 Teams | 1 Participant each";
+  }
   return formatParticipants(event ? event.participants : 0);
 }
 

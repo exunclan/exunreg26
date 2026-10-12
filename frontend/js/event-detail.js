@@ -91,9 +91,11 @@ class EventDetailPage {
     const icons = this.icons();
     const details = document.getElementById("event-info");
     if (details) {
+      const isSurprise = /surprise/i.test(this.event.name || "") || /surprise/i.test(this.event.id || "");
+      const participantsValue = isSurprise ? "2 Teams of 1" : String(this.event.participants || "TBA");
       const rows = [
         ["Mode", icons.mode, Utils.formatEventMode(this.event.mode) || "TBA"],
-        ["Participants", icons.participants, String(this.event.participants || "TBA")],
+        ["Participants", icons.participants, participantsValue],
         ["Eligibility", icons.eligibility, this.formatEligibilityDetail()],
         ["Points", icons.points, String(this.event.points || 0)],
         ["Dates", icons.dates, this.event.dates || "TBA"]
