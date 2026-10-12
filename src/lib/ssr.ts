@@ -324,7 +324,7 @@ export async function serveEventDetail(c: AppContext, slugOrId: string): Promise
         const content = eventDetailContent(ev)
         html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(content.title)}</title>`)
         html = html.replace(/<h1 class="event-detail-heading" id="event-heading">[\s\S]*?<\/h1>/, `<h1 class="event-detail-heading" id="event-heading">${content.heading}</h1>`)
-        html = html.replace(/<img[\s\S]*?id="event-image"[\s\S]*?\/>/, `<img src="${esc(content.image)}" alt="${esc(String(ev.name || 'Event'))}" class="event-detail__image" id="event-image" />`)
+        html = html.replace(/<img[^<>]*id="event-image"[^<>]*\/>/, `<img src="${esc(content.image)}" alt="${esc(String(ev.name || 'Event'))}" class="event-detail__image" id="event-image" />`)
         html = html.replace(/<div class="event-description" id="event-description">[\s\S]*?<\/div>/, `<div class="event-description" id="event-description">${content.desc}</div>`)
         html = html.replace(/<div class="event-info" id="event-info">\s*<div class="loading-placeholder">Loading\.\.\.<\/div>\s*<\/div>/, `<div class="event-info" id="event-info">${content.info}</div>`)
     }
