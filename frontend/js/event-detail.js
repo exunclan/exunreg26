@@ -174,6 +174,12 @@ class EventDetailPage {
         setTimeout(() => Utils.redirect("/complete", 100), 900);
         return;
       }
+      const isIndividual = !!(profileResp.data.individual || profileResp.data.Individual);
+      const allowsIndividual = !!(this.event.independentRegistration ?? this.event.independent_registration ?? this.event.individual ?? true);
+      if (isIndividual && !allowsIndividual) {
+        Utils.showToast("This event does not allow individual registration", "error");
+        return;
+      }
     } catch (e) {
       Utils.showToast("Failed to verify profile. Please login again.", "error");
       Utils.redirect("/login", 200);

@@ -77,6 +77,9 @@ export async function submitRegistrations(c: AppContext) {
     if (!event) {
         return jsonError(c, 'Event not found', 404)
     }
+    if (user.individual && !event.independentRegistration) {
+        return jsonError(c, 'This event does not allow individual registration', 403)
+    }
     const existing = await queries.getRegistrationByEventUser(db, payload.eventId, user.id)
     if (existing) {
         return jsonError(c, 'Already registered for this event. Use PUT to update or DELETE to remove.', 409)
@@ -161,6 +164,9 @@ export async function updateRegistration(c: AppContext) {
     const event = await queries.getEventById(db, payload.eventId)
     if (!event) {
         return jsonError(c, 'Event not found', 404)
+    }
+    if (user.individual && !event.independentRegistration) {
+        return jsonError(c, 'This event does not allow individual registration', 403)
     }
     const existing = await queries.getRegistrationByEventUser(db, payload.eventId, user.id)
     if (!existing) {
