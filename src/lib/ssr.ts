@@ -158,9 +158,10 @@ function applyActiveLink(navbar: string, activePath: string): string {
     return navbar.replace(/<a\s+([^>]*?)href="([^"]*)"([^>]*?)>/g, (m, pre: string, href: string, post: string) => {
         const h = href === '/index.html' ? '/' : href
         if (h !== norm) return m
+        const cls = m.match(/class="([^"]*)"/)
+        if (!cls || !cls[1].split(/\s+/).includes('navbar__link')) return m
         if (/navbar__link--active/.test(m)) return m
-        if (/class="/.test(m)) return m.replace(/class="([^"]*)"/, 'class="$1 navbar__link--active"')
-        return `<a ${pre}href="${href}"${post} class="navbar__link--active">`
+        return m.replace(/class="([^"]*)"/, 'class="$1 navbar__link--active"')
     })
 }
 
