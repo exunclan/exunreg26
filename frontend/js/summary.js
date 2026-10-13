@@ -99,13 +99,24 @@ class SummaryPage {
     }
   }
 
+  isForeignNumber() {
+    const raw = String(this.userProfile.phoneNumber || this.userProfile.phone_number || "").trim();
+    if (!raw.startsWith("+")) return false;
+    return !raw.replace(/\D/g, "").startsWith("91");
+  }
+
   renderRegistrations() {
     const container = document.getElementById("registrations-container");
     if (!container) return;
     const byId = new Map((this.registrations || []).map((r) => [String(r.eventId), r]));
-    const events = (this.allEvents && this.allEvents.length > 0)
-      ? this.allEvents
+    let events = (this.allEvents && this.allEvents.length > 0)
+      ? [...this.allEvents]
       : (this.registrations || []).map((r) => ({ id: r.eventId, name: r.eventName || r.eventId }));
+    const foreign = this.isForeignNumber();
+    if (foreign) {
+      const rank = (ev) => String(ev.mode || ev.eventMode || "").toLowerCase() === "online" ? 0 : 1;
+      events.sort((a, b) => rank(a) - rank(b));
+    }
     if (events.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
@@ -117,7 +128,7 @@ class SummaryPage {
       if (browse) browse.addEventListener("click", () => (window.location.href = "/events"));
       return;
     }
-    container.innerHTML = `<div class="registrations-grid">${events.map((ev) => {
+    container.innerHTML = `${foreign ? `<div class="foreign-notice" role="note">Your registered number is international. <strong>Hybrid and Offline events require in-person attendance at the offline finals</strong>. Online events can be attended remotely.</div>` : ""}<div class="registrations-grid">${events.map((ev) => {
       const reg = byId.get(String(ev.id));
       if (reg && (reg.participants || []).length > 0) return this.renderRegistrationCard(reg, true);
       if (reg) return this.renderRegistrationCard(reg, false);
@@ -284,6 +295,7 @@ class SummaryPage {
     const info = document.createElement("div");
     info.className = "reg-edit__meta";
     const modeEl = document.createElement("div");
+    modeEl.className = "reg-edit__mode";
     modeEl.textContent = Utils.formatEventMode(ev.mode);
     const capEl = document.createElement("div");
     capEl.className = "reg-edit__sub";

@@ -484,6 +484,11 @@
   margin-bottom: 12px;
 }
 
+.reg-edit__mode {
+  color: #2977f5;
+  font-weight: 700;
+}
+
 .reg-edit__sub {
   font-size: 13px;
   color: #6b7280;
@@ -520,6 +525,16 @@
   font-size: 12px;
   font-weight: 600;
   color: #6b7280;
+}
+
+.foreign-notice {
+  background: #fff8e6;
+  border: 1px solid #f0d98c;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #5c4a00;
+  margin-bottom: 16px;
 }
 
 .reg-edit-row .btn--tertiary {
