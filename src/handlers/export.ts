@@ -95,7 +95,7 @@ export function buildRegistrationsTable(
             const lines = parts
                 .map((p) => {
                     const name = String(p.fullname ?? '').trim()
-                    const bits = [String(p.userEmail ?? '').trim(), String(p.className ?? '').trim() ? `Class ${String(p.className ?? '').trim()}` : '', String(p.phoneNumber ?? '').trim()].filter((b) => b.length > 0)
+                    const bits = [String(p.userEmail ?? '').trim(), String(p.phoneNumber ?? '').trim()].filter((b) => b.length > 0)
                     if (!name && bits.length === 0) return ''
                     return bits.length > 0 ? `${name} (${bits.join(', ')})` : name
                 })

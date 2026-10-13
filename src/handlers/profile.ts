@@ -7,7 +7,7 @@ import { newPasswordHash, hashSessionToken } from '../lib/crypto'
 import { individualRegistrations } from '../db/schema'
 import { eq } from 'drizzle-orm'
 import { getAuthTokenCookie } from '../lib/cookies'
-import { ADDRESS_MAX, NAME_MAX, SCHOOL_MAX, truncate, isValidEmail, isValidPhone, normalizeEmail } from '../lib/validation'
+import { ADDRESS_MAX, NAME_MAX, SCHOOL_MAX, truncate, isValidEmail, isValidName, isValidPhone, normalizeEmail } from '../lib/validation'
 
 export async function updateProfile(c: AppContext) {
     const email = getEmailFromCookie(c)
@@ -23,6 +23,7 @@ export async function updateProfile(c: AppContext) {
     if (pl.fullname !== undefined) {
         const v = truncate(String(pl.fullname ?? ''), NAME_MAX)
         if (!v) return jsonError(c, 'Fullname cannot be empty', 400)
+        if (!isValidName(v)) return jsonError(c, 'Fullname must contain only letters, spaces, hyphens, apostrophes or periods', 400)
         patch.fullname = v.toUpperCase()
     }
     if (pl.phoneNumber !== undefined) {

@@ -6,7 +6,7 @@ import type { UserInsert } from '../db/queries'
 import { individualRegistrations, registrations, users } from '../db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { getEmailFromCookie } from '../middleware/auth'
-import { ADDRESS_MAX, NAME_MAX, SCHOOL_MAX, TEAM_MAX, truncate, isValidEmail, isValidPhone, normalizeEmail } from '../lib/validation'
+import { ADDRESS_MAX, NAME_MAX, SCHOOL_MAX, TEAM_MAX, truncate, isValidEmail, isValidName, isValidPhone, normalizeEmail } from '../lib/validation'
 
 const MAX_STUDENTS = 25
 
@@ -44,6 +44,9 @@ function validateStudents(students: unknown, maxAllowed: number): { ok: true; st
         }
         if (rawName.length > NAME_MAX) {
             return { ok: false, error: `Student at index ${i}: fullname too long` }
+        }
+        if (!isValidName(rawName)) {
+            return { ok: false, error: `Student at index ${i}: fullname must contain only letters, spaces, hyphens, apostrophes or periods` }
         }
         const semail = normalizeEmail(student.email)
         if (!student.email || !isValidEmail(semail)) {

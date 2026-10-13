@@ -284,6 +284,17 @@
   align-items: center;
 }
 
+.inline-participant {
+  margin-bottom: 10px;
+}
+
+.inline-participant-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
 .btn--primary {
   background: #2977f5;
   color: #fff;

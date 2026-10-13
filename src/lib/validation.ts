@@ -2,7 +2,7 @@ export function normalizeEmail(email: string | undefined | null): string {
     return (email ?? '').trim().toLowerCase()
 }
 
-export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+export const EMAIL_REGEX = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]{2,}$/
 
 export function isValidEmail(email: string): boolean {
     const v = email.trim()
@@ -53,7 +53,12 @@ export function validateTicketInput(input: {
 
 export const NAME_MAX = 120
 export const TEAM_MAX = 80
-export const CLASS_MAX = 32
+export const NAME_REGEX = /^[\p{L}][\p{L}\s.'-]*$/u
+export function isValidName(name: string): boolean {
+    const v = String(name ?? '').trim()
+    if (v.length === 0 || v.length > NAME_MAX) return false
+    return NAME_REGEX.test(v)
+}
 export const SCHOOL_MAX = 160
 export const ADDRESS_MAX = 500
 

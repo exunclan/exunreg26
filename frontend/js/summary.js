@@ -203,7 +203,6 @@ class SummaryPage {
     return Array.from(box.querySelectorAll(".reg-edit-row")).map((r) => ({
       name: ((r.querySelector('[data-f="name"]') || {}).value || "").trim(),
       email: ((r.querySelector('[data-f="email"]') || {}).value || "").trim(),
-      cls: ((r.querySelector('[data-f="class"]') || {}).value || "").trim(),
       phone: ((r.querySelector('[data-f="phone"]') || {}).value || "").trim()
     }));
   }
@@ -216,7 +215,7 @@ class SummaryPage {
       for (let i = 0; i < current.length; i++) {
         const a = initial[i] || {};
         const b = current[i];
-        if ((a.name || "") !== b.name || (a.email || "") !== b.email || (a.cls || "") !== b.cls || (a.phone || "") !== b.phone) return true;
+        if ((a.name || "") !== b.name || (a.email || "") !== b.email || (a.phone || "") !== b.phone) return true;
       }
       return false;
     } catch (e) {
@@ -227,15 +226,17 @@ class SummaryPage {
   editorRow(member, idx) {
     const m = member || {};
     const n = idx == null ? "" : ` ${idx + 1}`;
-    const row = document.createElement("div");
-    row.className = "reg-edit-row";
+    const wrap = document.createElement("div");
+    wrap.className = "reg-edit-participant";
     const esc = (v) => Utils.escapeHtml(v == null ? "" : String(v));
-    row.innerHTML = `
-      <input class="form-input" data-f="name" placeholder="Full name${n}" autocomplete="off" readonly value="${esc(m.name)}" />
-      <input class="form-input" data-f="email" placeholder="Email${n}" autocomplete="off" readonly value="${esc(m.email)}" />
-      <input class="form-input" data-f="class" placeholder="Class${n}" autocomplete="off" readonly value="${esc(m.class)}" />
-      <input class="form-input" data-f="phone" placeholder="Phone${n}" autocomplete="off" readonly value="${esc(m.phone)}" />`;
-    return row;
+    wrap.innerHTML = `
+      <div class="reg-edit-row-label">Participant${n}</div>
+      <div class="reg-edit-row">
+      <input class="form-input" data-f="name" placeholder="Full name" autocomplete="off" readonly value="${esc(m.name)}" />
+      <input class="form-input" data-f="email" placeholder="Email" autocomplete="off" readonly value="${esc(m.email)}" />
+      <input class="form-input" data-f="phone" placeholder="Phone" autocomplete="off" readonly value="${esc(m.phone)}" />
+      </div>`;
+    return wrap;
   }
 
   async toggleEditor(cardEl, eventId) {
@@ -352,20 +353,27 @@ class SummaryPage {
 
   async saveEditor(inner, eventId, isUpdate) {
     const rows = this.editorSnapshot(inner);
+    const emailOk = (v) => /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(v || "");
+    const nameOk = (v) => /^[\p{L}][\p{L}\s.'-]*$/u.test(String(v || "").trim());
+    const phoneOk = (v) => !v || /^[+()\d\s-]{5,32}$/.test(v);
     const students = [];
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i];
       const n = i + 1;
-      if (!r.name && !r.email && !r.cls && !r.phone) continue;
-      if (!r.name) {
-        Utils.showToast(`Participant ${n}: name is required`, "error");
+      if (!r.name && !r.email && !r.phone) continue;
+      if (!nameOk(r.name)) {
+        Utils.showToast(`Participant ${n}: name must contain only letters, spaces, hyphens, apostrophes or periods`, "error");
         return;
       }
-      if (!r.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email)) {
+      if (!emailOk(r.email)) {
         Utils.showToast(`Participant ${n} (${r.name}): valid email required`, "error");
         return;
       }
-      students.push({ fullname: r.name, email: r.email, class: r.cls, phone: r.phone });
+      if (!phoneOk(r.phone)) {
+        Utils.showToast(`Participant ${n} (${r.name}): phone must contain only digits, spaces and + - ( )`, "error");
+        return;
+      }
+      students.push({ fullname: r.name, email: r.email, phone: r.phone });
     }
     if (students.length === 0) {
       Utils.showToast("Please add at least one participant", "error");

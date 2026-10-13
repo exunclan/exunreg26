@@ -236,23 +236,27 @@ class EventDetailPage {
     const rows = [];
 
     const createRow = (p, idx) => {
+      const wrap = document.createElement("div");
+      wrap.className = "inline-participant";
       const row = document.createElement("div");
       row.className = "inline-member-row";
       row.style.display = "grid";
       row.style.gridTemplateColumns = "repeat(auto-fit, minmax(150px, 1fr))";
       row.style.gap = "12px";
-      row.style.marginBottom = "10px";
+      const label = document.createElement("div");
+      label.className = "inline-participant-label";
+      label.textContent = `Participant ${idx + 1}`;
       const nameVal = Utils.escapeHtml(String((p && (p.name || p.fullname)) || ""));
       const emailVal = Utils.escapeHtml(String((p && p.email) || ""));
-      const classVal = Utils.escapeHtml(String((p && p.class) || ""));
       const phoneVal = Utils.escapeHtml(String((p && p.phone) || ""));
       row.innerHTML = `
         <input class="form-input" data-name="name" placeholder="Full name" value="${nameVal}" autocomplete="off" readonly />
         <input class="form-input" data-name="email" placeholder="Email" value="${emailVal}" autocomplete="off" readonly />
-        <input class="form-input" data-name="class" placeholder="Class" value="${classVal}" autocomplete="off" readonly />
         <input class="form-input" data-name="phone" placeholder="Phone" value="${phoneVal}" autocomplete="off" readonly />
       `;
-      return row;
+      wrap.appendChild(label);
+      wrap.appendChild(row);
+      return { wrap, row };
     };
 
     editor.addEventListener("focusin", (e) => {
@@ -261,9 +265,9 @@ class EventDetailPage {
     });
 
     for (let i = 0; i < capacity; i++) {
-      const r = createRow(existingMembers[i] || {}, i);
-      rows.push(r);
-      editor.appendChild(r);
+      const { wrap, row } = createRow(existingMembers[i] || {}, i);
+      rows.push(row);
+      editor.appendChild(wrap);
     }
 
     const headNote = document.createElement("p");
@@ -344,18 +348,19 @@ class EventDetailPage {
     saveBtn.addEventListener("click", async (e) => {
       e.stopPropagation();
       const students = [];
-      const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || "");
+      const emailOk = (v) => /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(v || "");
+      const nameOk = (v) => /^[\p{L}][\p{L}\s.'-]*$/u.test(String(v || "").trim());
+      const phoneOk = (v) => v === "" || /^[+()\d\s-]{5,32}$/.test(v);
       let failed = false;
       rows.forEach((r, i) => {
         if (failed) return;
         const name = (r.querySelector('[data-name="name"]').value || "").trim();
         const email = (r.querySelector('[data-name="email"]').value || "").trim();
-        const cls = (r.querySelector('[data-name="class"]').value || "").trim();
         const phone = (r.querySelector('[data-name="phone"]').value || "").trim();
-        if (!name && !email && !cls && !phone) return;
-        if (!name) {
+        if (!name && !email && !phone) return;
+        if (!nameOk(name)) {
           failed = true;
-          Utils.showToast(`Row ${i + 1}: name is required`, "error");
+          Utils.showToast(`Row ${i + 1}: name must contain only letters, spaces, hyphens, apostrophes or periods`, "error");
           return;
         }
         if (!emailOk(email)) {
@@ -363,7 +368,12 @@ class EventDetailPage {
           Utils.showToast(`Row ${i + 1} (${name}): valid email required`, "error");
           return;
         }
-        students.push({ fullname: name, email, class: cls, phone });
+        if (!phoneOk(phone)) {
+          failed = true;
+          Utils.showToast(`Row ${i + 1} (${name}): phone must contain only digits, spaces and + - ( )`, "error");
+          return;
+        }
+        students.push({ fullname: name, email, phone });
       });
       if (failed) return;
       if (students.length === 0) {
