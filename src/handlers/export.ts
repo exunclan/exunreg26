@@ -44,6 +44,7 @@ export function buildRegistrationsTable(
     indivRows: IndividualRegistrationRow[]
 ): string[][] {
     const eventsById = new Map(eventRows.map((e) => [String(e.id), e.name ?? String(e.id)]))
+    const eventIds = eventRows.map((e) => String(e.id))
     const userById = new Map(userRows.map((u) => [u.id, u]))
     const membersByUserEvent = new Map<string, IndividualRegistrationRow[]>()
     for (const m of indivRows) {
@@ -53,36 +54,56 @@ export function buildRegistrationsTable(
         membersByUserEvent.set(key, list)
     }
 
-    let width = 1
+    const regsByUser = new Map<number, RegistrationRow[]>()
     for (const r of regRows) {
-        const n = (membersByUserEvent.get(`${r.userId}:${r.eventId}`) ?? []).length
-        if (n > width) width = n
+        const list = regsByUser.get(r.userId) ?? []
+        list.push(r)
+        regsByUser.set(r.userId, list)
     }
-    width = Math.min(width, MAX_EXPORT_PARTICIPANTS)
 
-    const header = ['username', 'email', 'fullname', 'institution', 'event_id', 'event_name', 'team_name', 'status', 'registered_at']
-    for (let i = 1; i <= width; i++) {
-        header.push(`p${i}_name`, `p${i}_email`, `p${i}_class`, `p${i}_phone`)
+    const header = ['username', 'email', 'fullname', 'phone', 'institution', 'school_code', 'individual']
+    for (const id of eventIds) {
+        header.push(eventsById.get(id) ?? id)
     }
 
     const out: string[][] = [header]
-    for (const r of regRows) {
-        const u = userById.get(r.userId)
-        const parts = membersByUserEvent.get(`${r.userId}:${r.eventId}`) ?? []
+    const sortedUserIds = [...regsByUser.keys()].sort((a, b) => {
+        const ea = userById.get(a)?.email ?? ''
+        const eb = userById.get(b)?.email ?? ''
+        return ea.localeCompare(eb)
+    })
+    for (const userId of sortedUserIds) {
+        const u = userById.get(userId)
+        const regs = regsByUser.get(userId) ?? []
+        const regByEvent = new Map(regs.map((r) => [String(r.eventId), r]))
         const row = [
             cell(u?.username),
             cell(u?.email),
             cell(u?.fullname),
+            cell(u?.phoneNumber),
             cell(u?.institutionName),
-            cell(r.eventId),
-            cell(eventsById.get(String(r.eventId)) ?? r.eventId),
-            cell(r.teamName),
-            cell(r.status),
-            cell(r.createdAt),
+            cell(u?.schoolCode),
+            cell(u?.individual),
         ]
-        for (let i = 0; i < width; i++) {
-            const p = parts[i]
-            row.push(cell(p?.fullname), cell(p?.userEmail), cell(p?.className), cell(p?.phoneNumber))
+        for (const id of eventIds) {
+            const r = regByEvent.get(id)
+            if (!r) {
+                row.push('')
+                continue
+            }
+            const parts = membersByUserEvent.get(`${userId}:${id}`) ?? []
+            const lines = parts
+                .map((p) => {
+                    const name = String(p.fullname ?? '').trim()
+                    const bits = [String(p.userEmail ?? '').trim(), String(p.className ?? '').trim() ? `Class ${String(p.className ?? '').trim()}` : '', String(p.phoneNumber ?? '').trim()].filter((b) => b.length > 0)
+                    if (!name && bits.length === 0) return ''
+                    return bits.length > 0 ? `${name} (${bits.join(', ')})` : name
+                })
+                .filter((l) => l.length > 0)
+            const team = String(r.teamName ?? '').trim()
+            if (team) lines.unshift(team)
+            if (lines.length === 0) lines.push(String(r.status ?? 'registered'))
+            row.push(cell(lines.join('\n')))
         }
         out.push(row)
     }
