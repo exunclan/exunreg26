@@ -10,5 +10,11 @@
     "alt": "Jane Street",
     "link": "https://www.janestreet.com/",
     "height": "190px"
+  },
+  {
+    "imageUrl": "/assets/xyz-logo-color.png",
+    "alt": ".xyz",
+    "link": "https://www.gen.xyz/",
+    "height": "75px"
   }
 ]
