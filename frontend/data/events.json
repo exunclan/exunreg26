@@ -117,8 +117,8 @@
       "short": "A thrilling offline competition where wireless robots compete in a football match. Teams of three build two robots to score goals in 3-minute halves, adhering to size and power regulations."
     },
     "Roboknights: Maze Solver": {
-      "long": "Maze Solver is an autonomous robotics event where teams design and build a robot that navigates an unknown maze, reaches the destination, and reacts to colour, hazard and sequence challenges placed along the way. The event tests navigation, sensor integration, programming and decision-making.",
-      "short": "Maze Solver is an autonomous robotics event where teams design and build a robot that navigates an unknown maze, reaches the destination, and reacts to colour, hazard and sequence challenges placed along the way. The event tests navigation, sensor integration, programming and decision-making."
+      "long": "Maze Solver is an autonomous robotics event where teams design and build a robot that navigates an unknown maze, reaches the destination, and reacts to challenges placed along the way. The event tests navigation, sensor integration, programming and decision-making.",
+      "short": "Maze Solver is an autonomous robotics event where teams design and build a robot that navigates an unknown maze, reaches the destination, and reacts to challenges placed along the way. The event tests navigation, sensor integration, programming and decision-making."
     }
   },
   "participants": {
