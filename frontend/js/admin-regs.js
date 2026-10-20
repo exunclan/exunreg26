@@ -603,7 +603,7 @@ class AdminRegsPage {
         const phoneCell = this.renderLineColumn(phones, "meta") || `<div class="sheet-line sheet-line--meta sheet-empty-cell">—</div>`;
         return `<tr class="sheet-row">
             <td class="sheet-rownum">${index}</td>
-            <td class="sheet-td">${Utils.escapeHtml(r.schoolName || "")}</td>
+            <td class="sheet-td sheet-td--school">${Utils.escapeHtml(r.schoolName || "")}</td>
             <td class="sheet-td sheet-td--people">${nameCell}</td>
             <td class="sheet-td sheet-td--people">${emailCell}</td>
             <td class="sheet-td sheet-td--people">${phoneCell}</td>

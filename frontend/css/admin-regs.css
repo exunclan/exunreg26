@@ -448,6 +448,15 @@ body[data-page="admin-regs"] {
     box-shadow: 1px 0 0 #e8eaed;
 }
 
+.sheet-grid td.sheet-td--index,
+.sheet-grid td.sheet-td--school {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
 .sheet-td--people {
     padding-top: 0;
     padding-bottom: 0;
