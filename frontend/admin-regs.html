@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrations | Exun 2026</title>
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/context-menu.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/admin-regs.css">
+    <link rel="stylesheet" href="/css/toast.css">
+</head>
+<body data-page="admin-regs">
+    <main class="sheet-page">
+        <div class="sheet-toolbar">
+            <div class="sheet-toolbar__group">
+                <button class="sheet-btn" id="tb-refresh" type="button" title="Reload from database">Refresh</button>
+                <div class="sheet-menu-wrap">
+                    <button class="sheet-btn" id="tb-export" type="button">Export ▾</button>
+                    <div class="sheet-menu" id="tb-export-menu" hidden>
+                        <button type="button" data-export="csv">Download CSV</button>
+                        <button type="button" data-export="tsv">Copy as TSV</button>
+                    </div>
+                </div>
+                <div class="sheet-menu-wrap">
+                    <button class="sheet-btn" id="tb-more" type="button">More ▾</button>
+                    <div class="sheet-menu" id="tb-more-menu" hidden>
+                        <button type="button" data-more="sel">Copy selection</button>
+                        <button type="button" data-more="copy">Copy whole table</button>
+                        <button type="button" data-more="print">Print</button>
+                        <button type="button" data-more="reset">Reset filters</button>
+                    </div>
+                </div>
+            </div>
+            <div class="sheet-toolbar__group">
+                <div class="sheet-search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
+                    <input id="tb-search" type="search" placeholder="Search everything" autocomplete="off" spellcheck="false" />
+                    <button class="sheet-search__clear" id="tb-search-clear" type="button" hidden aria-label="Clear search">×</button>
+                </div>
+                <div class="sheet-menu-wrap">
+                    <button class="sheet-btn sheet-btn--filter" id="tb-school" type="button">All schools ▾</button>
+                    <div class="sheet-menu sheet-menu--wide" id="tb-school-menu" hidden></div>
+                </div>
+            </div>
+            <div class="sheet-toolbar__spacer"></div>
+        </div>
+
+        <div class="sheet-grid-wrap" id="sheet-grid-wrap">
+            <table class="sheet-grid" id="sheet-grid">
+                <thead id="sheet-head"></thead>
+                <tbody id="sheet-body"></tbody>
+            </table>
+        </div>
+
+        <div class="sheet-tabs-bar">
+            <button class="sheet-tabs-arrow" id="tabs-prev" type="button" aria-label="Scroll tabs left">&#8249;</button>
+            <button class="sheet-tabs-arrow" id="tabs-next" type="button" aria-label="Scroll tabs right">&#8250;</button>
+            <div class="sheet-tabs" id="sheet-tabs"></div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/admin-regs.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (document.body && document.body.getAttribute("data-page") === "admin-regs") {
+            window.adminRegsPage = new AdminRegsPage();
+        }
+    });
+    </script>
+</body>
+</html>

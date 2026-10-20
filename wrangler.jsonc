@@ -65,7 +65,7 @@
   },
   "vars": {
     "COOKIE_SECURE": "true",
-    "ADMIN_EMAILS": "exun@dpsrkp.net",
+    "ADMIN_EMAILS": "exun@dpsrkp.net,admin@exunclan.com,support@exunclan.com,roboknights@dpsrkp.net,d2s@dpsrkp.net,cubxl@dpsrkp.net",
     "QDRANT_COLLECTION": "exunreg26-kb"
   }
 }

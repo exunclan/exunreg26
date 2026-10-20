@@ -146,7 +146,7 @@ function sponsorRowHtml(list: any[]): string {
 function authHtml(session: SessionInfo): string {
     if (session.authenticated) {
         let links = `<a href="/summary" class="navbar__link">Registration Summary</a>`
-        if (session.isAdmin) links += `<a href="/admin" class="navbar__link">Admin</a>`
+        if (session.isAdmin) links += `<a href="/admin" class="navbar__link">Admin</a><a href="/admin/regs" class="navbar__link">Regs</a>`
         links += `<button class="btn btn--primary navbar__link" data-action="logout">Logout</button>`
         return links
     }

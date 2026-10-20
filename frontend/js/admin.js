@@ -139,6 +139,7 @@ class AdminPage {
             content.innerHTML = `
                 <div class="admin-registrations">
                     <h3>Registration Lookup</h3>
+                    <p style="margin:0 0 12px;color:#6b7280;font-size:14px">Looking for every registration in one place? <a href="/admin/regs" style="color:#2977f5;font-weight:600">Open the live registrations view</a>.</p>
                     <form id="reg-lookup-form" style="display:flex;gap:8px;margin-bottom:16px;" autocomplete="off">
                         <input id="reg-lookup-event" class="form-input" placeholder="Event ID" autocomplete="off" />
                         <button class="btn btn--primary" type="submit">Load</button>

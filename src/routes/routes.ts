@@ -1,9 +1,11 @@
 import { Hono } from 'hono'
 import type { Bindings, AppContext } from '../types'
 import { jsonError } from '../lib/response'
-import { adminRequired, authRequired } from '../middleware/auth'
+import { adminRequired, authRequired, getEmailFromCookie, isAuthenticated } from '../middleware/auth'
 import { adminRateLimiter, apiRateLimiter, authRateLimiter, chatRateLimiter } from '../middleware/rateLimit'
 import { cacheMiddleware } from '../middleware/cache'
+import { getDb } from '../db/client'
+import { isAdmin } from '../lib/admin'
 import * as handlers from '../handlers/handlers'
 import * as authHandlers from '../handlers/auth'
 import * as profileHandlers from '../handlers/profile'
@@ -17,6 +19,7 @@ import * as chatHandlers from '../handlers/chat'
 import * as adminTicketHandlers from '../handlers/adminTickets'
 import * as adminKbHandlers from '../handlers/adminKb'
 import * as ticketHandlers from '../handlers/tickets'
+import { getRegistrationOverview } from '../handlers/adminRegs'
 import { serveEventDetail, serveEvents, serveHome, serveShell } from '../lib/ssr'
 
 export function serveAsset(c: AppContext, path: string) {
@@ -90,6 +93,7 @@ export function setupRoutes() {
 
     app.get('/api/admin/stats', adminRequired, adminHandlers.getAdminStats)
     app.get('/api/admin/config', adminRequired, adminHandlers.getAdminConfig)
+    app.get('/api/admin/regs', adminRequired, getRegistrationOverview)
 
     app.post('/api/admin/events', adminRequired, adminHandlers.createEvent)
     app.get('/api/admin/events/:id', adminRequired, adminHandlers.getAdminEvent)
@@ -126,6 +130,14 @@ export function setupRoutes() {
     app.get('/summary', (c) => serveShell(c as AppContext, '/summary.html', '/summary'))
     app.get('/complete', (c) => serveShell(c as AppContext, '/complete.html', '/complete'))
     app.get('/admin', (c) => serveShell(c as AppContext, '/admin.html', '/admin'))
+    app.get('/admin/regs', async (c) => {
+        const ctx = c as AppContext
+        if (!(await isAuthenticated(ctx))) return c.redirect('/login')
+        const email = getEmailFromCookie(ctx)
+        const db = getDb(ctx.env)
+        if (!(await isAdmin(db, email, ctx.env))) return c.redirect('/login')
+        return serveShell(ctx, '/admin-regs.html', '/admin/regs')
+    })
     app.get('/brochure', (c) => serveShell(c as AppContext, '/brochure.html', '/brochure'))
     app.get('/query', (c) => serveShell(c as AppContext, '/query.html', '/query'))
     app.get('/query/tickets', (c) => serveShell(c as AppContext, '/query.html', '/query'))

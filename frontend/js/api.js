@@ -205,6 +205,9 @@ window.ExunServices.admin = {
     getUserDetails: function (id) {
         return apiRequest(`/api/admin/users/${encodeURIComponent(id)}`, { method: 'GET' });
     },
+    regsOverview: function () {
+        return apiRequest('/api/admin/regs', { method: 'GET' });
+    },
     getEventRegistrations: function (eventId) {
         return apiRequest(`/api/admin/events/${encodeURIComponent(eventId)}/registrations`, { method: 'GET' });
     },
