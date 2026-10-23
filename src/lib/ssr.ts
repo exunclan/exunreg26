@@ -6,6 +6,7 @@ import { getEmailFromCookie } from '../middleware/auth'
 import { isAuthenticated } from '../middleware/auth'
 import { isAdmin } from './admin'
 import { slugify } from './slug'
+import { eventLinksFor } from './event-links'
 import type { AppContext } from '../types'
 
 type SessionInfo = { authenticated: boolean; email: string | null; isAdmin: boolean }
@@ -114,6 +115,7 @@ function toPayload(ev: EventRow, regCount?: number) {
         open_to_all: (ev as any).openToAll,
         openToAll: (ev as any).openToAll,
         dates: (ev as any).dates,
+        links: eventLinksFor((ev as any).links),
         ...(regCount !== undefined ? { registrations: regCount } : {}),
     }
 }
@@ -236,6 +238,16 @@ async function findEvent(c: AppContext, slugOrId: string): Promise<any | null> {
     return found ? toPayload(found) : null
 }
 
+function linksRowHtml(ev: any): string {
+    const links = eventLinksFor(ev.links)
+    if (!links.length) return ''
+    const anchors = links
+        .map((link) => `<a class="event-info-link" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">${esc(link.label)}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>`)
+        .join('')
+    const icon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2977f5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
+    return `<div class="event-info-item"><span class="event-info-label">${icon}<span>Links</span></span><span class="event-info-value event-info-value--links">${anchors}</span></div>`
+}
+
 function eventDetailContent(ev: any): { title: string; heading: string; image: string; info: string; desc: string } {
     const name = String(ev.name || 'Event')
     const colon = name.indexOf(':')
@@ -252,6 +264,7 @@ function eventDetailContent(ev: any): { title: string; heading: string; image: s
         ['Dates', `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 9H21M7 3V5M17 3V5M6 12H8M11 12H13M16 12H18M6 15H8M11 15H13M16 15H18M6 18H8M11 18H13M16 18H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="#2977f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`, String(ev.dates || 'TBA')],
     ]
     const info = rows.map(([label, icon, value]) => `<div class="event-info-item"><span class="event-info-label">${icon}<span>${esc(label)}</span></span><span class="event-info-value">${esc(value)}</span></div>`).join('')
+        + linksRowHtml(ev)
     const shortDesc = String(ev.description_short || ev.descriptionShort || '')
     const longDesc = String(ev.description_long || ev.descriptionLong || '')
     let desc = ''

@@ -77,7 +77,8 @@ class EventDetailPage {
       participants: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2977f5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
       eligibility: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2977f5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
       points: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2977f5" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c.9 6.2 3.8 9.1 10 10-6.2.9-9.1 3.8-10 10-.9-6.2-3.8-9.1-10-10 6.2-.9 9.1-3.8 10-10z"/></svg>`,
-      dates: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 9H21M7 3V5M17 3V5M6 12H8M11 12H13M16 12H18M6 15H8M11 15H13M16 15H18M6 18H8M11 18H13M16 18H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="#2977f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+      dates: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 9H21M7 3V5M17 3V5M6 12H8M11 12H13M16 12H18M6 15H8M11 15H13M16 15H18M6 18H8M11 18H13M16 18H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="#2977f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      links: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2977f5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
     };
   }
 
@@ -88,6 +89,17 @@ class EventDetailPage {
     if (nums.length === 1) return `Grade ${nums[0]}`;
     const clean = String(this.event.eligibility == null ? "" : this.event.eligibility).trim();
     return clean === "" ? "TBA" : clean;
+  }
+
+  linksRowHtml(icon) {
+    const links = (Array.isArray(this.event.links) ? this.event.links : [])
+      .filter((link) => link && typeof link.url === "string" && Utils.isAllowedUrl(link.url));
+    const visibleLinks = links.length ? links : [{ label: "WhatsApp", url: "https://exun.co/26/whatsapp" }];
+    const anchors = visibleLinks.map((link) => {
+      const label = String(link.label || link.url);
+      return `<a class="event-info-link" href="${Utils.escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${Utils.escapeHtml(label)}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>`;
+    }).join("");
+    return `<div class="event-info-item"><span class="event-info-label">${icon}<span>Links</span></span><span class="event-info-value event-info-value--links">${anchors}</span></div>`;
   }
 
   renderEvent() {
@@ -123,7 +135,7 @@ class EventDetailPage {
       ];
       details.innerHTML = rows.map(([label, icon, value]) => `
         <div class="event-info-item"><span class="event-info-label">${icon}<span>${Utils.escapeHtml(label)}</span></span><span class="event-info-value">${Utils.escapeHtml(value)}</span></div>
-      `).join("");
+      `).join("") + this.linksRowHtml(icons.links);
     }
     const description = document.getElementById("event-description");
     if (description) {

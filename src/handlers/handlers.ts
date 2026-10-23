@@ -12,6 +12,7 @@ import type { UserInsert } from '../db/queries'
 import { verifyOTP } from './auth'
 import { isValidEmail, normalizeEmail } from '../lib/validation'
 import { quarterHourBucket } from '../lib/rateStore'
+import { eventLinksFor } from '../lib/event-links'
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 const SESSION_TTL_S = 30 * 24 * 60 * 60
@@ -151,6 +152,7 @@ function toEventPayload(ev: EventRow, registrationCount?: number) {
         open_to_all: ev.openToAll,
         openToAll: ev.openToAll,
         dates: ev.dates,
+        links: eventLinksFor(ev.links),
         ...(registrationCount !== undefined ? { registrations: registrationCount } : {}),
     }
 }

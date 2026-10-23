@@ -255,6 +255,10 @@ class AdminPage {
         const isNew = !ev || !ev.name;
         const e = ev || {};
         const checked = (v) => (v ? 'checked' : '');
+        const links = Array.isArray(e.links) ? e.links : [];
+        const linksText = (links.length ? links : [{ label: 'WhatsApp', url: 'https://exun.co/26/whatsapp' }])
+            .map((link) => `${link.label || ''} | ${link.url}`)
+            .join('\n');
         this.openModal(`
             <div class="admin-modal__header">
                 <h3 class="admin-modal__title">${isNew ? 'New event' : 'Edit event'}</h3>
@@ -304,6 +308,10 @@ class AdminPage {
                     </div>
                 </div>
                 <div class="admin-form__group">
+                    <label class="admin-form__label">Links (one per line: Label | URL)</label>
+                    <textarea id="ev-links" class="admin-form__textarea" placeholder="WhatsApp | https://exun.co/26/whatsapp">${Utils.escapeHtml(linksText)}</textarea>
+                </div>
+                <div class="admin-form__group">
                     <label class="admin-form__label">Short description</label>
                     <textarea id="ev-short" class="admin-form__textarea">${Utils.escapeHtml(e.description_short || e.descriptionShort || '')}</textarea>
                 </div>
@@ -336,6 +344,7 @@ class AdminPage {
                 mode: val('ev-mode'),
                 eligibility: val('ev-eligibility'),
                 dates: val('ev-dates'),
+                links: val('ev-links'),
                 participants: Math.max(1, Math.floor(num('ev-participants', 1))),
                 points: Math.max(0, Math.floor(num('ev-points', 0))),
                 descriptionShort: val('ev-short'),

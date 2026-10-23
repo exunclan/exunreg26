@@ -30,6 +30,7 @@ export const events = sqliteTable('events', {
   independentRegistration: integer('independent_registration', { mode: 'boolean' }).notNull().default(true),
   points: integer('points').notNull().default(0),
   dates: text('dates'),
+  links: text('links'),
   descriptionLong: text('description_long'),
   descriptionShort: text('description_short'),
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),

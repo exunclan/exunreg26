@@ -8,6 +8,7 @@ import { sendEmail } from '../lib/sendemail'
 import { clearResponseCache } from '../middleware/cache'
 import { parseLimit } from '../lib/paging'
 import { isValidEmail, normalizeEmail } from '../lib/validation'
+import { normalizeEventLinksInput } from '../lib/event-links'
 
 const EVENT_TEXT_FIELDS = ['name', 'image', 'eligibility', 'mode', 'dates', 'descriptionLong', 'descriptionShort'] as const
 const EVENT_BOOL_FIELDS = ['openToAll', 'independentRegistration'] as const
@@ -43,6 +44,15 @@ function pickEventFields(payload: unknown): { ok: true; data: EventInsert } | { 
             }
             data[field] = input[field]
         }
+    }
+
+    if (input.links !== undefined) {
+        if (typeof input.links === 'string' && input.links.length > 5000) {
+            return { ok: false, error: 'Field links is too long' }
+        }
+        const links = normalizeEventLinksInput(input.links)
+        if (!links.ok) return { ok: false, error: links.error }
+        data.links = links.value
     }
 
     return { ok: true, data: data as EventInsert }
